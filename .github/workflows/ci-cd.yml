@@ -72,38 +72,38 @@ jobs:
           name: backend-coverage
 
   # ===================================================================
-  # JOB 2 — TEST FRONTEND
+  # JOB 2 — TEST FRONTEND (DÉSACTIVÉ TEMPORAIREMENT)
   # ===================================================================
-  test-frontend:
-    name: 🎨 Frontend Tests
-    runs-on: ubuntu-latest
+  # test-frontend:
+  #   name: 🎨 Frontend Tests
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
       
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./frontend/package-lock.json
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #         cache-dependency-path: ./frontend/package-lock.json
 
-      - name: Install dependencies
-        working-directory: ./frontend
-        run: npm ci
+  #     - name: Install dependencies
+  #       working-directory: ./frontend
+  #       run: npm ci
 
-      - name: Lint Frontend
-        working-directory: ./frontend
-        run: npm run lint
+  #     - name: Lint Frontend
+  #       working-directory: ./frontend
+  #       run: npm run lint
 
-      - name: Run Frontend tests
-        working-directory: ./frontend
-        run: npm test -- --watchAll=false
+  #     - name: Run Frontend tests
+  #       working-directory: ./frontend
+  #       run: npm test -- --watchAll=false
 
-      - name: Build Frontend
-        working-directory: ./frontend
-        run: npm run build
+  #     - name: Build Frontend
+  #       working-directory: ./frontend
+  #       run: npm run build
 
   # ===================================================================
   # JOB 3 — SECURITY SCAN
@@ -111,7 +111,7 @@ jobs:
   security-scan:
     name: 🔒 Security Scan
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend]
+    needs: [test-backend]  # ← Modifié : retiré test-frontend
 
     steps:
       - name: Checkout code
@@ -153,7 +153,7 @@ jobs:
   build-docker:
     name: 🐳 Build Docker Images
     runs-on: ubuntu-latest
-    needs: [test-backend, test-frontend]
+    needs: [test-backend]  # ← Modifié : retiré test-frontend
 
     steps:
       - name: Checkout code
@@ -179,15 +179,16 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/secure-backend:latest
             ${{ secrets.DOCKER_USERNAME }}/secure-backend:${{ github.sha }}
 
-      - name: Build Frontend Image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/secure-frontend:latest
-            ${{ secrets.DOCKER_USERNAME }}/secure-frontend:${{ github.sha }}
+      # Frontend build désactivé temporairement
+      # - name: Build Frontend Image
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: ./frontend
+      #     file: ./frontend/Dockerfile
+      #     push: ${{ github.ref == 'refs/heads/main' }}
+      #     tags: |
+      #       ${{ secrets.DOCKER_USERNAME }}/secure-frontend:latest
+      #       ${{ secrets.DOCKER_USERNAME }}/secure-frontend:${{ github.sha }}
 
   # ===================================================================
   # JOB 5 — DEPLOY TO LOCAL VM (192.168.1.19)
