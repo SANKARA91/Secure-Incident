@@ -159,7 +159,7 @@ jobs:
   # ===================================================================
   deploy-local:
     name: 🚀 Deploy on Local Ubuntu VM
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build-docker
     if: github.ref == 'refs/heads/main'
     environment:
@@ -167,28 +167,19 @@ jobs:
       url: http://192.168.1.19
 
     steps:
-      - name: SSH into VM and deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          port: ${{ secrets.SSH_PORT || 22 }}
-          timeout: 60s
-          command_timeout: 10m
-          script: |
-            cd /opt/secure-incident
-            
-            echo "Pulling latest code..."
-            git pull origin main
+      - name: Deploy locally
+        run: |
+          cd /opt/secure-incident
+          
+          echo "Pulling latest code..."
+          git pull origin main
 
-            echo "Updating Docker containers..."
-            docker compose pull
-            docker compose up -d --force-recreate
+          echo "Updating Docker containers..."
+          docker compose pull
+          docker compose up -d --force-recreate
 
-            echo "Containers running:"
-            docker compose ps
+          echo "Containers running:"
+          docker compose ps
 
       - name: Local Healthcheck
         run: |
