@@ -172,7 +172,9 @@ jobs:
           cd /opt/secure-incident
           
           echo "Pulling latest code..."
-          git pull origin main
+          git fetch origin main
+          git reset --hard origin/main
+          git clean -fd
 
           echo "Updating Docker containers..."
           docker compose pull
